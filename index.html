@@ -210,4 +210,4 @@ if(matchMedia('(hover:none)').matches)document.body.classList.add('touch');
 load();drawDone();drawScenes();if(wantBg[0]!=='c')setBg(bgk);
 idbAll().then(l=>{l.sort((a,b)=>a.id<b.id?-1:1).forEach(c=>BGS[c.id]={...c,custom:true});
  if(wantBg&&BGS[wantBg]&&wantBg[0]==='c'){bgk=wantBg;drawScenes();setBg(wantBg)}else{drawScenes();if(wantBg[0]==='c')setBg('photo')}});placeT();$('#cmin').value=cust;$('#gs').value=gs;board.style.setProperty('--gs',gs);markPick();render();setMode('focus');
-</script></body></html>
+</script><script data-goatcounter="https://YOURCODE.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script></body></html>
