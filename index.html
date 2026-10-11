@@ -254,12 +254,26 @@ body.back #ptab,body.qs #ptab,body.pn #ptab,body.nb #ptab,body.pn #qtab{display:
 .qbt{display:flex;gap:.3em}.qe{width:2em;height:2em;border-radius:50%;border:1px solid #3b241744;background:#fff9ec;color:var(--ink);cursor:pointer;font-size:1em}.qe:hover{background:#ffe3b8}
 #evlist .ed{width:2em;height:2em;border-radius:50%;border:1px solid #3b241744;background:#fff9ec;color:var(--ink);cursor:pointer;font-size:1em}
 #evlist .eef .btn{width:auto;height:auto;border-radius:999px;margin-left:0;background:#3b24170f;font-size:.9em}#evlist .eef .btn.e-ok{background:var(--amber)}
+
+#focus{position:fixed;inset:0;z-index:900;display:flex;align-items:center;justify-content:center;background:rgba(18,7,22,.52);backdrop-filter:blur(10px) saturate(1.15);-webkit-backdrop-filter:blur(16px) saturate(1.1);color:var(--cream);animation:fin .4s ease}
+#focus[hidden]{display:none}@keyframes fin{from{opacity:0}}
+.fbox{display:flex;flex-direction:column;align-items:center;gap:3vmin;padding:20px;text-align:center;max-width:100vw}
+#flabel{font-size:clamp(15px,3vmin,24px);letter-spacing:.14em;text-transform:uppercase;opacity:.8}
+.fring{position:relative;width:min(70vmin,460px);aspect-ratio:1;display:grid;place-items:center}
+.fring svg{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg)}
+.fr0{fill:none;stroke:#ffffff1f;stroke-width:6}
+.fr1{fill:none;stroke:var(--amber);stroke-width:6;stroke-linecap:round;stroke-dasharray:917.35;stroke-dashoffset:0;transition:stroke-dashoffset .4s linear;filter:drop-shadow(0 0 8px #ff8a3d88)}
+#ftime{font-family:'Spline Sans Mono',monospace;font-size:clamp(48px,min(16vmin,17vw),150px);letter-spacing:-.02em;text-shadow:0 2px 24px #ff8a3d77}
+.fctl{display:flex;gap:12px}.fctl .btn{font-size:clamp(15px,2.6vmin,20px);padding:.6em 1.6em}
+.ftabs{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+#fx{position:absolute;top:calc(14px + env(safe-area-inset-top,0px));right:16px;width:42px;height:42px;border-radius:50%;border:1px solid #ffd9a566;background:#ffffff14;color:var(--cream);font-size:18px;cursor:pointer}
+#fx:hover{background:#ffffff2e}.fhint{font-size:13px;opacity:.5}
 </style></head><body>
 <div id="bgA"></div><div id="bgB"></div>
 <main>
 <section class="card" id="timer">
  <div class="clock"><div id="time">25:00</div><div id="label">Focus</div><div class="bar"><i id="prog"></i></div></div>
- <div class="ctrl"><button class="btn go" id="go">Start</button><button class="btn" id="reset">Reset</button><button class="btn" id="more" aria-label="Timer modes" aria-expanded="false">▾</button></div>
+ <div class="ctrl"><button class="btn go" id="go">Start</button><button class="btn" id="reset">Reset</button><button class="btn" id="more" aria-label="Timer modes" aria-expanded="false">▾</button><button class="btn" id="fsBtn" title="Full-screen focus mode" aria-label="Full-screen focus mode">⛶</button></div>
  <div id="menu"><div class="tabs" id="tabs"></div><label id="cust">Minutes <input type="number" id="cmin" min="1" max="240" value="10"></label></div>
 </section>
 <button id="fab" aria-expanded="false">+ Add task</button>
@@ -287,6 +301,11 @@ body.back #ptab,body.qs #ptab,body.pn #ptab,body.nb #ptab,body.pn #qtab{display:
 <section id="donep" aria-label="Completed tasks"><header><h2>Completed tasks</h2><button class="btn" id="delall">Delete all</button></header><ul id="dlist"></ul></section>
 <div id="msgs" aria-label="Deadline reminders" aria-live="polite"></div>
 <button id="soon" aria-label="Open upcoming events"></button>
+<div id="focus" hidden role="dialog" aria-label="Focus mode"><button id="fx" aria-label="Exit full screen">✕</button>
+ <div class="fbox"><div id="flabel"></div>
+  <div class="fring"><svg viewBox="0 0 320 320" aria-hidden="true"><circle class="fr0" cx="160" cy="160" r="146"/><circle class="fr1" id="fprog" cx="160" cy="160" r="146"/></svg><div id="ftime">25:00</div></div>
+  <div class="fctl"><button class="btn go" id="fgo">Start</button><button class="btn" id="freset">Reset</button></div>
+  <div class="ftabs" id="ftabs"></div><div class="fhint">Space to start or pause · Esc to exit</div></div></div>
 <button id="ptab" aria-label="Open today's plan">📋 Today's plan</button>
 <button id="qtab" aria-label="Open the questions board">❓ Questions ›</button>
 <section id="bgmp" aria-label="Background sound"><h2>Background sound</h2><div id="bgml"></div><label>Volume <input type="range" id="bvol" min="0" max="1" step="0.05" value="0.5"></label></section>
@@ -312,7 +331,7 @@ let mode='focus',total=25*60e3,left=total,endAt=0,tick=null;
 const fmt=ms=>{const s=Math.ceil(ms/1e3);return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')};
 function draw(){$('#time').textContent=fmt(left);$('#prog').style.width=(100-left/total*100)+'%';
  $('#label').textContent=MODES[mode][0]+(sessions?` · ${sessions} done`:'');
- $('#go').textContent=tick?'Pause':'Start';document.title=(tick?fmt(left)+' · ':'')+'Autumn Desk'}
+ $('#go').textContent=tick?'Pause':'Start';document.title=(tick?fmt(left)+' · ':'')+'Autumn Desk';drawFocus()}
 function setMode(m){clearInterval(tick);tick=null;mode=m;total=left=(m==='custom'?cust:MODES[m][1])*60e3;
  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',t.dataset.m===m));$('#cust').classList.toggle('show',m==='custom');draw()}
 function beep(){try{const c=new (window.AudioContext||window.webkitAudioContext)();[0,.25,.5].forEach(d=>{const o=c.createOscillator(),g=c.createGain();o.frequency.value=660+d*400;o.connect(g);g.connect(c.destination);g.gain.setValueAtTime(.15,c.currentTime+d);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+d+.22);o.start(c.currentTime+d);o.stop(c.currentTime+d+.25)})}catch(e){}}
@@ -453,6 +472,20 @@ fl2.addEventListener('pointerup',e=>{if(!sw)return;const dx=e.clientX-sw.x,dy=e.
 fl2.addEventListener('pointercancel',()=>{sw=null});
 document.addEventListener('keydown',e=>{if(e.ctrlKey||e.metaKey||e.altKey||e.target.closest('input,textarea,select,[contenteditable=true]'))return;
  if(e.key==='ArrowRight'){if(side==='front')goView('q');else if(side==='plan')goView('front')}else if(e.key==='ArrowLeft'){if(side==='front')goView('plan');else if(side==='q')goView('front')}});
+/* focus mode */
+let fsAuto=false,wl=null;
+async function wake(on){try{if(on&&navigator.wakeLock)wl=await navigator.wakeLock.request('screen');else if(wl){await wl.release();wl=null}}catch(e){}}
+function drawFocus(){if($('#focus').hidden)return;$('#ftime').textContent=fmt(left);$('#flabel').textContent=$('#label').textContent;$('#fgo').textContent=tick?'Pause':'Start';
+ $('#fprog').style.strokeDashoffset=917.35*(1-(total?left/total:1));document.querySelectorAll('#ftabs button').forEach(b=>b.classList.toggle('on',b.dataset.m===mode))}
+function focusOpen(o){const f=$('#focus');if(o===undefined)o=f.hidden;if(o===!f.hidden)return;f.hidden=!o;
+ if(o){drawFocus();calOpen(false);menu(false);bgmOpen(false);fsAuto=false;try{const r=document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen();if(r&&r.then)r.then(()=>{fsAuto=true}).catch(()=>{})}catch(e){}wake(true)}
+ else{if(document.fullscreenElement&&fsAuto){try{document.exitFullscreen()}catch(e){}}fsAuto=false;wake(false)}}
+document.addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement&&!$('#focus').hidden&&fsAuto)focusOpen(false)});
+$('#ftabs').innerHTML=Object.entries(MODES).map(([k,v])=>`<button class="tab" data-m="${k}">${k==='custom'?'Custom':v[0]}</button>`).join('');
+$('#ftabs').onclick=e=>{if(e.target.dataset.m)setMode(e.target.dataset.m)};
+$('#fsBtn').onclick=()=>focusOpen(true);$('#fx').onclick=()=>focusOpen(false);$('#fgo').onclick=()=>$('#go').click();$('#freset').onclick=()=>$('#reset').click();
+document.addEventListener('keydown',e=>{if($('#focus').hidden)return;if(['h','H','f','F','ArrowLeft','ArrowRight'].includes(e.key)){e.stopImmediatePropagation();return}
+ if(e.code==='Space'&&!e.target.closest('button,input,select,textarea,[contenteditable=true]')){e.preventDefault();$('#go').click()}},true);
 /* hide board */
 function toggleBoard(){const h=document.body.classList.toggle('nb');$('#hide').textContent=h?'Show board':'Hide board';drawEvents();if(h)toggleAdder(false)}
 $('#hide').onclick=toggleBoard;
@@ -501,7 +534,7 @@ function addNote(){const v=$('#task').value.trim();if(!v){$('#task').focus();ret
  const n={id:Date.now()+Math.random(),t:v,s:pick,pr:prPick,x:6+Math.random()*58,y:6+Math.random()*38,r:+(Math.random()*10-5).toFixed(1),z:Math.max(0,...notes.map(a=>a.z||1))+1};
  notes.push(n);board.append(el(n));$('#task').value='';sfx(prPick==='normal'?'pin':'pin2');save();info();toggleAdder(false)}
 const toggleAdder=o=>{const a=$('#adder');const on=o??!a.classList.contains('open');a.classList.toggle('open',on);$('#fab').textContent=on?'✕ Close':'+ Add task';$('#fab').setAttribute('aria-expanded',on);if(on)setTimeout(()=>$('#task').focus(),50)};
-$('#fab').onclick=()=>toggleAdder();document.addEventListener('keydown',e=>{if(e.key==='Escape'){toggleAdder(false);menu(false);doneP(false);calOpen(false);bgmOpen(false)}});
+$('#fab').onclick=()=>toggleAdder();document.addEventListener('keydown',e=>{if(e.key==='Escape'){toggleAdder(false);menu(false);doneP(false);calOpen(false);bgmOpen(false);focusOpen(false)}});
 $('#add').onclick=addNote;$('#task').onkeydown=e=>{if(e.key==='Enter')addNote()};
 function complete(d,delay=0,quiet=false){setTimeout(()=>{d.classList.add('done');if(!quiet)sfx('done');setTimeout(()=>{const n=notes.find(n=>n.id==d.dataset.id);if(n){dn.unshift({...n,at:Date.now()});notes=notes.filter(x=>x!==n)}d.remove();save();info();drawDone()},720)},delay)}
 function drawDone(){$('#doneBtn').textContent=`Completed (${dn.length})`;
