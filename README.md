@@ -1,6 +1,6 @@
 # Lockin Notes 🍂
 
-A cosy autumn study desk in your browser: a focus timer, a cork pin board for today's tasks, and boards for your daily plan, upcoming deadlines and questions for your teacher. Everything runs on one web page, with no account and no install.
+A cosy autumn study desk in your browser: a focus timer, a cork pin board for today's tasks, and boards for your weekly plan, upcoming deadlines and questions for your teacher. Everything runs on one web page, with no account and no install.
 
 **Live site:** https://haydenwork321-del.github.io/Lockin-notes/
 
@@ -14,14 +14,17 @@ A cosy autumn study desk in your browser: a focus timer, a cork pin board for to
 - **Full-screen focus mode:** the **⛶** button opens a big distraction-free timer with a progress ring. It uses your browser's full screen where available and keeps the screen awake.
 
 ### Sticky-note pin board
-- **Pin notes:** add a task, choose a paper style, and drag it anywhere on the cork board.
+- **Pin notes:** add a task, choose a paper style, and drag it anywhere on the cork board. The writing box takes up to 240 characters, with **Shift+Enter** for a new line, and long notes shrink their text to fit the paper.
 - **Colour-coded pins:** a green pin for simple tasks, a red pin for serious ones, and no pin for normal ones. Click the **●** on a note to change it.
 - **Edit and resize:** edit text, make a single note bigger or smaller, or use the **Note size** slider for all of them.
 - **Completed list:** ticking a note peels it off the board and saves it under **Completed**. Restore or delete it whenever you like.
 - **Hide board:** fade the board away to enjoy the scenery.
 
 ### Other boards (swipe or use the edge tabs)
-- **📋 Today's plan (swipe right or ←):** a time-and-task schedule with a progress bar. It highlights the next item, turns late ones red, and carries unfinished items over to the next day.
+- **📋 Weekly plan (swipe right or ←):** plan Monday to Sunday. Each task has a start and end time ("9:00 to 10:30"), and the day tabs show your progress for each day. The next item is highlighted and missed ones turn red.
+  - **Shift the schedule:** push a whole day's times earlier or later by 15 minutes up to 3 hours, so 1:00 and 2:30 become 1:30 and 3:00. Ticked items stay put unless you choose to include them.
+  - **Move tasks between days:** move one unfinished task with the **➜** button, or move all of a day's unfinished tasks at once.
+  - **Undo and next week:** the last change can be undone. Unfinished items carry over to the new week, and **Repeat last week** copies the previous week's plan.
 - **❓ Questions (swipe left or →):** questions to ask the teacher, tagged with who they're for. Tick one off once asked and write down the answer.
 - **Upcoming events (flip button or `F`):** the back of the board. Add exams and deadlines, mark the important ones with a ★, and choose how early to be reminded.
 - **Calendar:** open the 📅 button on the events side. Days with events get dots, and clicking a day filters the list.
@@ -39,7 +42,7 @@ A cosy autumn study desk in your browser: a focus timer, a cork pin board for to
 | --- | --- |
 | `F` | Flip the board to upcoming events and back |
 | `H` | Hide or show the board |
-| `←` / `→` | Open Today's plan / Questions, and come back |
+| `←` / `→` | Open Weekly plan / Questions, and come back |
 | `Space` | Start or pause (in full-screen focus mode) |
 | `Esc` | Close a popup, or leave focus mode |
 
@@ -74,7 +77,7 @@ The handwriting fonts load from Google Fonts, so they need an internet connectio
 
 ## Built with
 
-Plain HTML, CSS and JavaScript, with no frameworks and no build step. All images and sounds are embedded in the page, which is why the file is about 11 MB.
+Plain HTML, CSS and JavaScript, with no frameworks and no build step. All images and sounds are embedded in the page, which is why the file is about 4.5 MB.
 
 ## Credits
 
