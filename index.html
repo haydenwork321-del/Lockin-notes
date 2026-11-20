@@ -281,7 +281,7 @@ body.back #ptab,body.qs #ptab,body.pn #ptab,body.nb #ptab,body.pn #qtab{display:
 @media(max-width:700px){#adder{padding:14px}#task{font-size:28px;min-height:56px}#adder .styles{grid-template-columns:repeat(3,1fr)}#adder .sty{height:72px}#adder .prs button{font-size:15px;padding:11px 8px}#add{font-size:20px}}
 #task{font-size:30px;min-height:150px;resize:vertical;line-height:1.15;font-family:'Caveat',cursive}
 #adder .cnt{flex:1 1 100%;text-align:right;font-size:12px;opacity:.65;margin-top:-8px}
-.ti{white-space:pre-wrap;max-width:100%;overflow-wrap:anywhere}
+.ti{white-space:pre-line;max-width:100%;overflow-wrap:anywhere}
 .ti[contenteditable=true]{cursor:text;background:#fff6;border-radius:4px;outline:none}
 
 #pdays{display:flex;gap:.35em;flex:none}
@@ -595,8 +595,8 @@ const markPick=()=>document.querySelectorAll('.sty').forEach(s=>s.classList.togg
 const esc=s=>s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 function el(n){const [t,l,r,b]=INS[n.s],d=document.createElement('div');d.className='note pr-'+(n.pr||'normal');d.dataset.id=n.id;
  d.style.cssText=`left:${n.x}%;top:${n.y}%;--r:${n.r}deg;--sc:${n.sc||1};z-index:${n.z||1}`;
- d.innerHTML=`<img src="${IMG[n.s]}" alt="">${pinHtml(n.pr)}<div class="txt" style="--t:${t}%;--l:${l}%;--rt:${r}%;--b:${b}%"><span class="ti">${esc(n.t)}</span></div><div class="acts"><button title="Smaller" class="sm">−</button><button title="Bigger" class="lg">+</button><button title="Change priority (simple / normal / serious)" class="pri">●</button><button title="Edit" class="ed">✎</button><button title="Done — move to Completed" class="ok">✓</button></div>`;return d}
-function render(){board.querySelectorAll('.note').forEach(x=>x.remove());notes.forEach(n=>board.append(el(n)));info();fitAll()}
+ d.innerHTML=`<img src="${IMG[n.s]}" alt="">${pinHtml(n.pr)}<div class="txt" style="--t:${t}%;--l:${l}%;--rt:${r}%;--b:${b}%"><span class="ti">${esc(String(n.t==null?'':n.t).replace(/\n{3,}/g,'\n\n').trim())}</span></div><div class="acts"><button title="Smaller" class="sm">−</button><button title="Bigger" class="lg">+</button><button title="Change priority (simple / normal / serious)" class="pri">●</button><button title="Edit" class="ed">✎</button><button title="Done — move to Completed" class="ok">✓</button></div>`;try{ro.observe(d.querySelector('.txt'))}catch(e){}return d}
+function render(){board.querySelectorAll('.note').forEach(x=>x.remove());notes.forEach(n=>{try{board.append(el(n))}catch(e){console.error('note failed',e)}});info();fitAll()}
 function info(){$('#hint').style.display=notes.length?'none':'grid';$('#count').textContent=notes.length?`${notes.length} task${notes.length>1?'s':''} still pinned${(c=>c?` · ${c} serious`:'')(notes.filter(n=>n.pr==='serious').length)}`:'All clear — nice work.'}
 function addNote(){const v=$('#task').value.trim();if(!v){$('#task').focus();return}
  const n={id:Date.now()+Math.random(),t:v,s:pick,pr:prPick,x:6+Math.random()*58,y:6+Math.random()*38,r:+(Math.random()*10-5).toFixed(1),z:Math.max(0,...notes.map(a=>a.z||1))+1};
@@ -625,10 +625,12 @@ function cyclePr(d){const n=notes.find(n=>n.id==d.dataset.id),o=['simple','norma
  d.className=d.className.replace(/pr-\w+/,'pr-'+n.pr);const op=d.querySelector('.pinst');if(op)op.remove();if(PINS[n.pr])d.querySelector('img').insertAdjacentHTML('afterend',pinHtml(n.pr));if(PINS[n.pr])sfx('pin2');save();info()}
 function markPr(){document.querySelectorAll('#prs button').forEach(b=>b.classList.toggle('on',b.dataset.p===prPick))}
 $('#prs').onclick=e=>{const b=e.target.closest('[data-p]');if(b){prPick=b.dataset.p;markPr()}};
-function fitTxt(d){const t=d.querySelector('.txt'),ti=d.querySelector('.ti');if(!t||!ti)return;let s=1;t.style.setProperty('--fs',1);
- for(let i=0;i<18&&(ti.offsetHeight>t.clientHeight+1||ti.scrollWidth>t.clientWidth+1)&&s>.26;i++){s=+(s-.05).toFixed(2);t.style.setProperty('--fs',s)}}
+const ro=new ResizeObserver(es=>es.forEach(e=>{const d=e.target.closest('.note');if(d)fitTxt(d)}));
+function fitTxt(d){const t=d.querySelector('.txt'),ti=d.querySelector('.ti');if(!t||!ti||!t.clientHeight||!t.clientWidth)return;let s=1;t.style.setProperty('--fs',1);t.style.alignItems='';
+ for(let i=0;i<18&&(ti.offsetHeight>t.clientHeight+1||ti.scrollWidth>t.clientWidth+1)&&s>.26;i++){s=+(s-.05).toFixed(2);t.style.setProperty('--fs',s)}
+ if(ti.offsetHeight>t.clientHeight+1)t.style.alignItems='flex-start'}
 function fitAll(){board.querySelectorAll('.note').forEach(fitTxt)}
-if(document.fonts&&document.fonts.ready)document.fonts.ready.then(fitAll);addEventListener('load',fitAll);
+if(document.fonts){document.fonts.ready.then(fitAll);document.fonts.addEventListener('loadingdone',fitAll)}addEventListener('load',fitAll);
 function fit(d,n){const R=board.getBoundingClientRect(),w=d.offsetWidth/R.width*100,h=d.offsetHeight/R.height*100;n.x=Math.max(1,Math.min(99-w,n.x));n.y=Math.max(1,Math.min(99-h,n.y));d.style.left=n.x+'%';d.style.top=n.y+'%'}
 $('#gs').oninput=e=>{gs=+e.target.value;board.style.setProperty('--gs',gs);fitAll()};
 $('#gs').onchange=()=>{board.querySelectorAll('.note').forEach(d=>fit(d,notes.find(n=>n.id==d.dataset.id)));save()};
